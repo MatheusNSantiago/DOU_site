@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %} Teste {% endblock %}
+{% block content %}
+
+
+<ul class="pagination justify-content-center">
+    {% for date in dates %}
+    {% if date == data %}
+    <li class="page-item container-fluid px-0 active"><a class="page-link"
+            href="./{{date}}">{{date.day}}/{{date.month}}</a></li>
+    {% else %}
+    <li class="page-item container-fluid px-0"><a class="page-link" href="./{{date}}">{{date.day}}/{{date.month}}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+
+
+<img src="../static/images/banner.jpg" class="img-fluid">
+<p class="text-muted text-center">Secretaria da Diretoria e do Conselho Monetário Nacional – Sucon</p>
+<p class="text-center font-weight-bold h4">Publicações de {{data.strftime('%d-%m-%Y')}} |
+    Edição XXX</p>
+
+
+{% for escopo, pubs in subjects.items() %}
+<table class="table align-middle">
+    <thead>
+        <tr>
+            <th class="h5 col-5">{{escopo}}</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody">
+        {% for pub in pubs %}
+        <tr>
+            <th class="border-0">
+                <a href="{{pub.pdf}}"> {{pub.titulo}} </a>
+            </th>
+            <td class="py-4 border-0">{{pub.ementa}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+</table>
+
+{% endfor %}
+
+{% endblock %}
