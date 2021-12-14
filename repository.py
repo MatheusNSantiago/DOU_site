@@ -1,61 +1,61 @@
-import mysql.connector
-import json
-from mysql.connector.cursor import MySQLCursor
-from mysql.connector.connection import MySQLConnection
-
+from datetime import datetime
+import re
+from typing import List
 from model import Publicacao
+import boto3
+import os
+from boto3.dynamodb.conditions import Attr, Key
+
 
 class SumulaDB:
-    def __init__(self, is_local=True):
-        if is_local:
-            self._conn = mysql.connector.connect(
-                host="127.0.0.1",
-                user="root",
-                password="oasuet10",
-                database="dou_db_local",
-            )
-        else:
-            with open("credentials.json", "r") as f:
-                cred = json.loads(f.read())
+    def __init__(self) -> None:
+        dynamodb = boto3.resource(
+            "dynamodb",
+            region_name="sa-east-1",
+            # aws_access_key_id=os.environ["ACCESS_KEY"],
+            # aws_secret_access_key=os.environ["SECRET_KEY"],
+        )
 
-                self._conn = mysql.connector.connect(
-                    host=cred["ENDPOINT"],
-                    user=cred["USER"],
-                    password=cred["PASSWORD"],
-                    database=cred["DATABASE"],
-                )
+        self._table = dynamodb.Table("sumula-dou")
 
-        self._cursor = self._conn.cursor()
+        self.publicacoes = self.get_all_publications()
 
-    def __enter__(self):
-        return self
+    def get_all_publications(self):
+        response = self._table.scan()
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._close()
+        resp = response["Items"]
+        while "LastEvaluatedKey" in response:
+            response = self._table.scan(ExclusiveStartKey=response["LastEvaluatedKey"])
+            resp.extend(response["Items"])
 
-    @property
-    def connection(self) -> MySQLConnection:
-        return self._conn
+        # Transforma todas os items que não forem aquele de guardar data (13834509) em publicacoes
+        pubs = [Publicacao(**item) for item in resp if item["id_materia"] != "13834509"]
 
-    @property
-    def cursor(self) -> MySQLCursor:
-        return self._cursor
+        return pubs
 
-    def commit(self):
-        self.connection.commit()
+    def publicacoes_do_dia_por_escopo(self, data: str):
+        subjects: dict[str, List[Publicacao]] = dict()
 
-    def _close(self, commit=False):
-        if commit:
-            self.commit()
-        self.connection.close()
+        for pub in self.publicacoes:
+            if (pub.data == data):
+                try:
+                    subjects[pub.escopo].append(pub)
+                except:
+                    subjects[pub.escopo] = [pub]
+                    
+        for escopo, pubs in subjects.items():
+            subjects[escopo] = sorted(pubs, key=lambda pub: pub.titulo)
+            
 
-    def execute(self, sql, params=None):
-        self.cursor.execute(sql, params or ())
+        return subjects
 
-    def _fetchall(self):
-        resp = [Publicacao(*pub) for pub in self.cursor.fetchall()]
-        return resp
-    
-    def query(self, sql, params=None):
-        self.cursor.execute(sql, params or ())
-        return self._fetchall()
+    def get_unique_dates(self):
+        response = self._table.get_item(Key={"id_materia": "13834509"})
+        item = response["Item"]
+        dates = eval(item["conteudo"])
+
+        unique_dates = sorted(
+            [datetime.strptime(date, "%Y-%m-%d").date() for date in dates]
+        )
+
+        return unique_dates
