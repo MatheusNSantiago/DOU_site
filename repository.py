@@ -1,5 +1,4 @@
 from datetime import datetime
-import re
 from typing import List
 from model import Publicacao
 import boto3
@@ -12,8 +11,8 @@ class SumulaDB:
         dynamodb = boto3.resource(
             "dynamodb",
             region_name="sa-east-1",
-            # aws_access_key_id=os.environ["ACCESS_KEY"],
-            # aws_secret_access_key=os.environ["SECRET_KEY"],
+            aws_access_key_id=os.environ["ACCESS_KEY"],
+            aws_secret_access_key=os.environ["SECRET_KEY"],
         )
 
         self._table = dynamodb.Table("sumula-dou")
