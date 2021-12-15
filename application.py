@@ -6,16 +6,11 @@ from repository import SumulaDB
 
 application = Flask(__name__)
 
-db = SumulaDB()
-dates = db.get_unique_dates()
 
 @application.route("/")
 def home():
-    global db
-    db = SumulaDB()
-    global dates
+    global dates 
     dates = db.get_unique_dates()
-    
     return redirect(url_for("sumula_do_dia", data=str(dates[-1])))
 
 
@@ -34,6 +29,8 @@ def sumula_do_dia(data: str):
 
 
 if __name__ == "__main__":
+    db = SumulaDB()
+    
+    dates = db.get_unique_dates()
+    
     application.run()
-        
-   
