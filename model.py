@@ -28,7 +28,7 @@ class Publicacao:
         """ Limpa a publicação """
         # Tirar o excesso do título
         if self.titulo != None:
-            self.titulo = re.sub(r", DE .+ 2021", "", self.titulo)
+            self.titulo = re.sub(r", DE .+2021", "", self.titulo)
 
         escopos_importantes = [
             "Banco Central do Brasil",
