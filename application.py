@@ -9,13 +9,17 @@ application = Flask(__name__)
 
 @application.route("/")
 def home():
-    global dates 
-    dates = db.get_unique_dates()
+    dates = SumulaDB().get_unique_dates()
+
+
     return redirect(url_for("sumula_do_dia", data=str(dates[-1])))
 
 
 @application.route("/sumulas/<data>")
 def sumula_do_dia(data: str):
+    db = SumulaDB()    
+
+    dates = db.get_unique_dates()
     pubs = db.publicacoes_do_dia_por_escopo(data)
 
     data = datetime.datetime.strptime(data, "%Y-%m-%d").date()
@@ -28,9 +32,5 @@ def sumula_do_dia(data: str):
     )
 
 
-if __name__ == "__main__":
-    db = SumulaDB()
-    
-    dates = db.get_unique_dates()
-    
+if __name__ == "__main__":    
     application.run()
