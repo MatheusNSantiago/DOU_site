@@ -1,5 +1,4 @@
-import json
-import os
+
 from typing import List
 from model import Publicacao
 import firebase_admin
@@ -9,9 +8,10 @@ import json
 import datetime
 
 
+
 class SumulaDB:
     def __init__(self) -> None:
-        cred = credentials.Certificate(json.loads(os.environ["CRED"]))
+        cred = credentials.Certificate("cred.json")
         firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
         self.db = firestore.client()
 

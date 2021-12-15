@@ -7,9 +7,12 @@ from repository import SumulaDB
 application = Flask(__name__)
 
 
+db = SumulaDB()
+
 @application.route("/")
 def home():
-    dates = SumulaDB().get_unique_dates()
+    global db
+    dates = db.get_unique_dates()
 
 
     return redirect(url_for("sumula_do_dia", data=str(dates[-1])))
@@ -17,8 +20,7 @@ def home():
 
 @application.route("/sumulas/<data>")
 def sumula_do_dia(data: str):
-    db = SumulaDB()    
-
+    global db
     dates = db.get_unique_dates()
     pubs = db.publicacoes_do_dia_por_escopo(data)
 
