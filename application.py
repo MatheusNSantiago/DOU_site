@@ -6,6 +6,12 @@ from repository import SumulaDB
 
 application = Flask(__name__)
 
+import os
+print("|-----------------------------------------|")
+print("|-----------------------------------------|")
+print(os.environ["CLIENT_ID"])
+print("|-----------------------------------------|")
+print("|-----------------------------------------|")
 
 db = SumulaDB()
 
