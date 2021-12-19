@@ -1,44 +1,65 @@
+from datetime import datetime
 from typing import List
-from model import Publicacao
+from models.publicacao import Publicacao
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
-import datetime
-import os
+from models.comentario import Comentario
+import re
 
-class SumulaDB:
-    def __init__(self) -> None:
-        cred = credentials.Certificate(
-            {
-                "type": "service_account",
-                "project_id": "sumula-dou",
-                "private_key_id": "83ab6174f69ce38bc55133d7ef9507e86f5f5e52",
-                "private_key": os.environ["PRIVATE_KEY"],
-                "client_email": "firebase-adminsdk-hdk8k@sumula-dou.iam.gserviceaccount.com",
-                "client_id": os.environ["CLIENT_ID"],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hdk8k%40sumula-dou.iam.gserviceaccount.com",
-            }
-        )
-        firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
-        self.db = firestore.client()
+cred = credentials.Certificate("cred.json")
+firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
+db = firestore.client()
 
-    def publicacoes_do_dia_por_escopo(self, data):
-        subjects: dict[str, List[Publicacao]] = dict()
 
-        docs = self.db.collection(data).stream()
-        for doc in docs:
-            pub = Publicacao(**doc.to_dict())
-            subjects.setdefault(pub.escopo, []).append(pub)
+def publicacoes_do_dia_por_escopo(data):
+    subjects: dict[str, List[Publicacao]] = dict()
 
-        for escopo, pubs in subjects.items():
-            subjects[escopo] = sorted(pubs, key=lambda pub: pub.titulo)
+    docs = db.collection(data).stream()
+    for doc in docs:
+        pub = Publicacao(**doc.to_dict())
+        subjects.setdefault(pub.escopo, []).append(pub)
 
-        return subjects
+    for escopo, pubs in subjects.items():
+        subjects[escopo] = sorted(pubs, key=lambda pub: pub.titulo)
 
-    def get_unique_dates(self):
-        collections = self.db.collections()
-        to_date = lambda x: datetime.datetime.strptime(x, "%Y-%m-%d").date()
-        return [to_date(collection.id) for collection in collections]
+    return subjects
+
+
+def get_unique_dates():
+    collections = db.collections()
+
+    to_date = lambda x: datetime.strptime(x, "%Y-%m-%d").date()
+
+    unique_dates = []
+    for collection in collections:
+        if collection.id.startswith("20"):
+            unique_dates.append(to_date(collection.id))
+
+    return unique_dates
+
+
+def adionar_comentario(comentario:Comentario):
+    db.collection(f"comentarios").document(comentario.na_sumula_do_dia).collection(
+        "foo"
+    ).add(comentario.__dict__)
+
+
+def pegar_comentarios_da_sumula(do_dia: str) -> List[Comentario]:
+    docs = db.collection(f"comentarios/{do_dia}/foo").stream()
+
+    comentarios = []
+
+    for doc in docs:
+       c = Comentario(**doc.to_dict())
+       
+       c.created_at = re.sub(r"\..+$", "", c.created_at)
+       
+       
+       c.created_at= datetime.strptime(c.created_at,"%Y-%m-%d %H:%M:%S")
+       c.created_at = datetime.strftime(c.created_at, "%d/%m/%Y as %H:%M:%S")
+       
+       comentarios.append(c)
+
+    return comentarios
+    

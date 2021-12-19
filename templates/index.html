@@ -2,6 +2,13 @@
 {% block title %} Teste {% endblock %}
 {% block content %}
 
+{% for message in get_flashed_messages() %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    {{message}}
+    <button type="button" class="btn-close" data-bs-dismis="alert" aria-label="fechar"></button>
+</div>
+{% endfor %}
+
 
 <ul class="pagination justify-content-center">
     {% for date in dates %}
@@ -41,7 +48,31 @@
         {% endfor %}
         </tbody>
 </table>
+{% endfor %}
+
+
+<h1>Comentários</h1>
+
+{% for comentario in comentarios %}
+
+<div class="card m-3">
+    <div class="card-header"> {{comentario.created_at}} </div>
+    <div class="card-body"> {{comentario.conteudo}} </div>
+</div>
 
 {% endfor %}
+
+<div class="shadows p-3 mb-5 bg-body rounded">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        {{form.conteudo(class="form-control", rows="5", placeholder="Novo comentário")}}
+        <br />
+
+        {{form.created_at}}
+
+        {{form.submit(class="btn btn-secondary")}}
+    </form>
+</div>
 
 {% endblock %}
