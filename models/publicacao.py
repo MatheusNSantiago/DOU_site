@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from datetime import date
 import re
+from datetime import date
 
 
 @dataclass
@@ -28,7 +28,9 @@ class Publicacao:
         """ Limpa a publicação """
         # Tirar o excesso do título
         if self.titulo != None:
-            self.titulo = re.sub(r", DE .+2021", "", self.titulo)
+            self.titulo = self.titulo.upper()
+            
+            self.titulo = re.sub(r",? DE .+2021?", "", self.titulo)
 
         escopos_importantes = [
             "Banco Central do Brasil",
@@ -52,3 +54,5 @@ class Publicacao:
                 self.escopo = "Outros"
 
         self.ementa = self.ementa if self.ementa else ""
+
+        

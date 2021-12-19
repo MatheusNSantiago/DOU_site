@@ -1,4 +1,7 @@
 .vscode
+cred.json
+DOU_site.zip
+zz.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
