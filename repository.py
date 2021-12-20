@@ -5,9 +5,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from models.comentario import Comentario
-import re
-import pytz
-
 
 cred = credentials.Certificate("cred.json")
 firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
@@ -47,10 +44,10 @@ def adionar_comentario(comentario: Comentario):
     ).document(comentario.uid).set(comentario.to_firestore())
 
 
-def deletar_comentario(comentario: Comentario):
-    db.collection(f"comentarios").document(comentario.na_sumula_do_dia).collection(
-        "foo"
-    ).document(comentario.uid).delete()
+def deletar_comentario(data_sumula, uid):
+    db.collection(f"comentarios").document(data_sumula).collection("foo").document(
+        uid
+    ).delete()
 
 
 def pegar_comentarios_da_sumula(do_dia: str) -> List[Comentario]:

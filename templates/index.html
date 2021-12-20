@@ -14,9 +14,9 @@
     {% for date in dates %}
     {% if date == data %}
     <li class="page-item container-fluid px-0 active"><a class="page-link"
-            href="./{{date}}">{{date.day}}/{{date.month}}</a></li>
+            href="{{url_for('sumula_do_dia', data=date)}}">{{date.strftime('%d/%m')}}</a></li>
     {% else %}
-    <li class="page-item container-fluid px-0"><a class="page-link" href="./{{date}}">{{date.day}}/{{date.month}}</a>
+    <li class="page-item container-fluid px-0"><a class="page-link" href="./{{date}}">{{date.strftime('%d/%m')}}</a>
     </li>
     {% endif %}
     {% endfor %}
@@ -56,7 +56,10 @@
 {% for comentario in comentarios %}
 
 <div class="card m-3">
-    <div class="card-header"> {{comentario.created_at}} </div>
+    <div class="card-header d-flex justify-content-between align-items-center">
+         <div>{{comentario.created_at}}</div>
+         <a href="{{url_for('deletar_comentario', data_sumula=data, uid=comentario.uid)}}" class="btn btn-outline-danger btm-sm">Deletar</a>
+    </div>
     <div class="card-body"> {{comentario.conteudo}} </div>
 </div>
 

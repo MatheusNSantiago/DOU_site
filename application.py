@@ -43,6 +43,18 @@ def sumula_do_dia(data: str):
     )
 
 
+@application.route("/sumulas/<data_sumula>/comentario/delete/<uid>")
+def deletar_comentario(data_sumula, uid):
+    try:
+        repo.deletar_comentario(data_sumula, uid)
+        flash("Comentario foi deletado")
+    except:
+        flash("Erro no servidor")
+        
+    
+    return redirect(url_for('sumula_do_dia', data = data_sumula))
+
+
 if __name__ == "__main__":
     # application.run()
     application.run(debug=True)
