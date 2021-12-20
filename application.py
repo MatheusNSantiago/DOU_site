@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 from flask.helpers import flash
 from utils import ComentarioForm
@@ -23,24 +23,26 @@ def sumula_do_dia(data: str):
     if form.validate_on_submit():
         comentario = Comentario(
             conteudo=form.conteudo.data,
-            created_at=str(datetime.now()),
+            created_at=str(datetime.now(tz=timezone.utc)),
             na_sumula_do_dia=data,
         )
         form.conteudo.data = ""
 
         repo.adionar_comentario(comentario)
-
         flash("Comentário foi adicionado")
+        
+        return redirect(url_for("sumula_do_dia", data=data))
 
     return render_template(
         "index.html",
         dates=repo.get_unique_dates()[-20::],
         subjects=repo.publicacoes_do_dia_por_escopo(data),
         data=datetime.strptime(data, "%Y-%m-%d").date(),
-        comentarios=repo.pegar_comentarios_da_sumula(data)[::-1],
+        comentarios=repo.pegar_comentarios_da_sumula(data),
         form=form,
     )
 
 
 if __name__ == "__main__":
-    application.run()
+    # application.run()
+    application.run(debug=True)
