@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from models.publicacao import Publicacao
 import firebase_admin
@@ -6,6 +6,8 @@ from firebase_admin import credentials
 from firebase_admin import firestore
 from models.comentario import Comentario
 import re
+import pytz
+
 
 cred = credentials.Certificate("cred.json")
 firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
@@ -39,27 +41,20 @@ def get_unique_dates():
     return unique_dates
 
 
-def adionar_comentario(comentario:Comentario):
+def adionar_comentario(comentario: Comentario):
     db.collection(f"comentarios").document(comentario.na_sumula_do_dia).collection(
         "foo"
-    ).add(comentario.__dict__)
+    ).document(comentario.uid).set(comentario.to_firestore())
+
+
+def deletar_comentario(comentario: Comentario):
+    db.collection(f"comentarios").document(comentario.na_sumula_do_dia).collection(
+        "foo"
+    ).document(comentario.uid).delete()
 
 
 def pegar_comentarios_da_sumula(do_dia: str) -> List[Comentario]:
     docs = db.collection(f"comentarios/{do_dia}/foo").stream()
+    comentarios = [Comentario.from_firestore(doc) for doc in docs]
 
-    comentarios = []
-
-    for doc in docs:
-       c = Comentario(**doc.to_dict())
-       
-       c.created_at = re.sub(r"\..+$", "", c.created_at)
-       
-       
-       c.created_at= datetime.strptime(c.created_at,"%Y-%m-%d %H:%M:%S")
-       c.created_at = datetime.strftime(c.created_at, "%d/%m/%Y as %H:%M:%S")
-       
-       comentarios.append(c)
-
-    return comentarios
-    
+    return sorted(comentarios, key=lambda c: c.created_at)
