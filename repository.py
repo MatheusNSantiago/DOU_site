@@ -1,10 +1,12 @@
-from datetime import datetime, timezone
+from datetime import datetime
+from re import sub
 from typing import List
 from models.publicacao import Publicacao
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 from models.comentario import Comentario
+import inspect
 
 cred = credentials.Certificate("cred.json")
 firebase_admin.initialize_app(cred, {"projectId": "sumula-dou"})
@@ -23,6 +25,17 @@ def publicacoes_do_dia_por_escopo(data):
         subjects[escopo] = sorted(pubs, key=lambda pub: pub.titulo)
 
     return subjects
+
+
+# def get_notas_de_atualizacao():
+#     notas_de_atualizacao = inspect.cleandoc(
+#         """
+#         - Link da publicação agora leva à publicação no in.gov
+#         """
+#     )
+
+#     return notas_de_atualizacao
+
 
 
 def get_unique_dates():

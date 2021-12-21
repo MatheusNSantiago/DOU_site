@@ -39,6 +39,7 @@ def sumula_do_dia(data: str):
         subjects=repo.publicacoes_do_dia_por_escopo(data),
         data=datetime.strptime(data, "%Y-%m-%d").date(),
         comentarios=repo.pegar_comentarios_da_sumula(data),
+        # notas_de_atualizacao = repo.get_notas_de_atualizacao(),
         form=form,
     )
 
@@ -56,5 +57,5 @@ def deletar_comentario(data_sumula, uid):
 
 
 if __name__ == "__main__":
-    # application.run()
-    application.run(debug=True)
+    application.run()
+    # application.run(debug=True)

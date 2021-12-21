@@ -2,6 +2,7 @@
 {% block title %} Teste {% endblock %}
 {% block content %}
 
+<!-- |-----------------------------------------| Mensagens flash |-----------------------------------------| -->
 {% for message in get_flashed_messages() %}
 <div class="alert alert-warning alert-dismissible fade show" role="alert">
     {{message}}
@@ -10,6 +11,7 @@
 {% endfor %}
 
 
+<!-- |-----------------------------------------| Barra dos dias |-----------------------------------------| -->
 <ul class="pagination justify-content-center">
     {% for date in dates %}
     {% if date == data %}
@@ -23,27 +25,39 @@
 </ul>
 
 
+<!-- |-----------------------------------------| Imagem + descrição |-----------------------------------------| -->
 <img src="../static/images/banner.jpg" class="img-fluid">
 <p class="text-muted text-center">Secretaria da Diretoria e do Conselho Monetário Nacional – Sucon</p>
 <p class="text-center font-weight-bold h4">Publicações de {{data.strftime('%d-%m-%Y')}} |
     Edição XXX</p>
 
 
+<!-- |-----------------------------------------| Table |-----------------------------------------| -->
+
 {% for escopo, pubs in subjects.items() %}
-<table class="table align-middle">
+<table class="table table-hover align-middle">
     <thead>
         <tr>
-            <th class="h5 col-5">{{escopo}}</th>
+            {% if data.day == 21 %}
+            <th class="h5" style="width: 20%;">{{escopo}}</th>
+            <th style="width: 50%;"></th>
+            <th style="width: 30;"></th>
+            {% else %}
+            <th class="h5 col-5"></th>
             <th></th>
+            {% endif %}
         </tr>
     </thead>
     <tbody">
         {% for pub in pubs %}
         <tr>
-            <th class="border-0">
-                <a href="{{pub.pdf}}"> {{pub.titulo}} </a>
+            <th class="py-4 px-3 border-0 border-end">
+                <a href={{pub.pdf}}> {{pub.titulo}} </a>
             </th>
-            <td class="py-4 border-0">{{pub.ementa}}</td>
+            <td class="py-4 px-3 border-0 border-end">{{pub.ementa}}</td>
+            {% if data.day == 21 %}
+            <td class="py-4 px-3 border-0 text-end">{{pub.motivo}}</td>
+            {% endif %}
         </tr>
         {% endfor %}
         </tbody>
@@ -51,21 +65,27 @@
 {% endfor %}
 
 
+
+<!-- |-----------------------------------------| Comentários |-----------------------------------------| -->
+<div style="height: 30px;"></div>
 <h1>Comentários</h1>
 
 {% for comentario in comentarios %}
 
 <div class="card m-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-         <div>{{comentario.created_at}}</div>
-         <a href="{{url_for('deletar_comentario', data_sumula=data, uid=comentario.uid)}}" class="btn btn-outline-danger btm-sm">Deletar</a>
+        <div>{{comentario.created_at}}</div>
+        <a href="{{url_for('deletar_comentario', data_sumula=data, uid=comentario.uid)}}"
+            class="btn btn-outline-danger btm-sm">Deletar</a>
     </div>
-    <div class="card-body"> {{comentario.conteudo}} </div>
+    <div class="card-body", style="white-space: pre-wrap;">{{comentario.conteudo}}</div>
 </div>
 
 {% endfor %}
 
-<div class="shadows p-3 mb-5 bg-body rounded">
+<!-- |-----------------------------------------| Novo comentário |-----------------------------------------| -->
+
+<div class="shadows py-3 mb-5 bg-body rounded">
     <form method="POST">
         {{ form.hidden_tag() }}
 
